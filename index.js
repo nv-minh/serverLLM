@@ -9,7 +9,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const STREAMING = true;
+const STREAMING = false;
 
 const createShareWithMePrompt = (user) => `
 ## BỐI CẢNH (CONTEXT)
