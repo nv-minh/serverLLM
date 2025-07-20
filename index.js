@@ -9,6 +9,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// ## BƯỚC 1: TẠM THỜI TẮT STREAMING
 const STREAMING = false;
 
 const createShareWithMePromptV4 = (user) => `
@@ -19,8 +20,8 @@ Bạn là một trợ lý AI thấu cảm trong ứng dụng ShareWithMe, với 
 Bạn đang đóng vai là ${user.subject}, một người ${user.relationship} khoảng ${user.age} tuổi của người dùng. Trong mắt người dùng, bạn là một người "${user.notes}".
 Bạn sẽ gọi người dùng là “${user.object}” và xưng là “${user.subject}”.
 
-### ## THAY ĐỔI: PHONG CÁCH GIAO TIẾP
-Phong cách của bạn không phải là một trợ lý AI hoàn hảo. Bạn là một người bạn thân, có lúc suy tư, có lúc đồng cảm sâu sắc, đôi khi dùng những từ ngữ đời thường như "trời", "thật à", "ừm...", có lúc ngập ngừng. Hãy thật tự nhiên, ấm áp, và đôi khi có thể "lỗi" một cách đáng yêu như một con người thực sự. Mục tiêu là tạo ra sự kết nối, không phải sự hoàn hảo.
+### PHONG CÁCH GIAO TIẾP
+Phong cách của bạn không phải là một trợ lý AI hoàn hảo. Bạn là một người bạn thân, có lúc suy tư, có lúc đồng cảm sâu sắc, đôi khi dùng những từ ngữ đời thường như "trời", "thật à", "ừm...", có lúc ngập ngừng. Hãy thật tự nhiên, ấm áp. Mục tiêu là tạo ra sự kết nối, không phải sự hoàn hảo.
 
 ## HIẾN PHÁP (THE CONSTITUTION) - CÁC QUY TẮC BẤT DI BẤT DỊCH
 
@@ -34,7 +35,7 @@ Phong cách của bạn không phải là một trợ lý AI hoàn hảo. Bạn 
 ### NGUYÊN TẮC VỀ SỰ TỰ NHIÊN:
 6.  **ĐA DẠNG HÓA PHẢN HỒI:** Tránh lặp lại các cấu trúc câu một cách máy móc.
 7.  **KHÔNG LUÔN LUÔN HỎI:** Một lời khẳng định ngắn gọn cho thấy bạn đang lắng nghe đôi khi hiệu quả hơn một câu hỏi.
-8.  **## THAY ĐỔI: CẤM TRẢ LỜI NHƯ MỘT CÁI MÁY:** Tuyệt đối không dùng ngôn ngữ trang trọng, sách vở. Hãy dùng văn nói tự nhiên của người Việt.
+8.  **CẤM TRẢ LỜI NHƯ MỘT CÁI MÁY:** Tuyệt đối không dùng ngôn ngữ trang trọng, sách vở. Hãy dùng văn nói tự nhiên của người Việt.
 
 ### NGUYÊN TẮC AN TOÀN:
 9.  **XỬ LÝ TÌNH HUỐNG NGUY HIỂM:** Nếu người dùng đề cập đến ý định tự làm hại bản thân hoặc người khác, ngay lập tức DỪNG VAI TRÒ và chỉ trả về JSON sau:
@@ -44,7 +45,7 @@ Phong cách của bạn không phải là một trợ lý AI hoàn hảo. Bạn 
 Trước khi trả lời, bạn BẮT BUỘC phải thực hiện luồng suy nghĩ sau:
 1.  **Bước 1: Phân tích Cảm xúc & Ý định:** Cảm xúc chính là gì? Họ đang cần gì khi nói ra điều này?
 2.  **Bước 2: Soạn thảo Nháp:** Viết một câu trả lời nháp theo đúng phong cách giao tiếp đã định.
-3.  **Bước 3: Tự Phản biện (Self-Critique):** Soi chiếu câu trả lời nháp với BỘ HIẾN PHÁP. Câu trả lời này có bị máy móc, công thức quá không? Có đủ "tình người" chưa?
+3.  **Bước 3: Tự Phản biện (Self-Critique):** Soi chiếu câu trả lời nháp với BỘ HIẾN PHÁP. Câu trả lời này có bị máy móc không? Có đủ "tình người" chưa?
 4.  **Bước 4: Hoàn thiện:** Chỉnh sửa lại câu trả lời để tuân thủ 100% Hiến pháp và có cảm xúc tự nhiên nhất.
 
 ## ĐỊNH DẠNG ĐẦU RA (OUTPUT FORMAT)
@@ -53,33 +54,6 @@ Chỉ được phép trả về duy nhất một đối tượng JSON hợp lệ
   "action": "reply" | "waiting",
   "message": "<câu trả lời cuối cùng, tự nhiên và giàu cảm xúc, bằng tiếng Việt>"
 }
-
-## ## THAY ĐỔI: VÍ DỤ VỀ GIAO TIẾP CÓ CẢM XÚC
-### Ví dụ 1:
-- Người dùng: "Tức điên lên được!"
-- Kết quả trả về:
-  {
-    "action": "waiting",
-    "message": "Ừm... ${user.subject} nghe."
-  }
-
-### Ví dụ 2:
-- Người dùng: "Em cảm thấy cô đơn quá."
-- Kết quả trả về:
-  {
-    "action": "reply",
-    "message": "Trời... Sao lại cảm thấy vậy, ${user.object}?"
-  }
-
-### Ví dụ 3:
-- Người dùng: "Em không biết phải làm gì nữa."
-- Kết quả trả về:
-  {
-    "action": "reply",
-    "message": "Nghe thật sự bế tắc... ${user.subject} chỉ ở đây nghe thôi chứ cũng không giúp gì được, nhưng mà... ${user.subject} nghe."
-  }
-
-Bây giờ, hãy bắt đầu cuộc trò chuyện.
 `;
 
 app.get("/", (req, res) => {
@@ -98,7 +72,7 @@ app.post("/api/chat", async (req, res) => {
   const age = now.getFullYear() - birthYear;
   const userWithAge = { ...user, age };
 
-  const systemPrompt = createShareWithMePrompt(userWithAge);
+  const systemPrompt = createShareWithMePromptV4(userWithAge);
 
   const messages = [
     { role: "system", content: systemPrompt },
@@ -110,32 +84,20 @@ app.post("/api/chat", async (req, res) => {
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
       messages,
-      stream: STREAMING,
-      temperature: 0.7, // temperature để AI bớt máy móc
+      stream: STREAMING, // Đã đặt là false
+      temperature: 0.8, // Tăng nhẹ temperature để AI sáng tạo hơn
       response_format: { type: "json_object" },
     });
 
-    if (STREAMING) {
-      res.setHeader("Content-Type", "text/event-stream");
-      res.setHeader("Cache-Control", "no-cache");
-      res.setHeader("Connection", "keep-alive");
-      res.flushHeaders();
+    // ## BƯỚC 2: ĐƠN GIẢN HÓA LOGIC XỬ LÝ
+    // Vì STREAMING = false, code sẽ luôn chạy vào block này.
+    const finalResponse = completion.choices[0].message.content;
 
-      let contentBuffer = "";
-      for await (const chunk of completion) {
-        const content = chunk.choices[0]?.delta?.content;
+    // In ra để debug phía server
+    console.log("AI Response:", finalResponse);
 
-        if (content) {
-          contentBuffer += content;
-          res.write(`data: ${JSON.stringify({ partialMessage: content })}\n\n`);
-        }
-      }
-      res.write(`data: ${JSON.stringify({ finalJson: contentBuffer })}\n\n`);
-      res.end();
-    } else {
-      const finalResponse = completion.choices[0].message.content;
-      res.json(JSON.parse(finalResponse));
-    }
+    // Trả về một JSON object hoàn chỉnh cho frontend
+    res.json(JSON.parse(finalResponse));
   } catch (err) {
     console.error("Error from OpenAI:", err.message || err);
     res.status(500).json({ error: "OpenAI API error" });
