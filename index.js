@@ -108,7 +108,7 @@ app.post("/api/chat", async (req, res) => {
   const age = now.getFullYear() - birthYear;
   const userWithAge = { ...user, age };
 
-  const systemPrompt = createShareWithMePromptV4(userWithAge);
+  const systemPrompt = createShareWithMePromptV5(userWithAge);
 
   const messages = [
     { role: "system", content: systemPrompt },
@@ -125,14 +125,10 @@ app.post("/api/chat", async (req, res) => {
       response_format: { type: "json_object" },
     });
 
-    // ## BƯỚC 2: ĐƠN GIẢN HÓA LOGIC XỬ LÝ
-    // Vì STREAMING = false, code sẽ luôn chạy vào block này.
     const finalResponse = completion.choices[0].message.content;
 
-    // In ra để debug phía server
     console.log("AI Response:", finalResponse);
 
-    // Trả về một JSON object hoàn chỉnh cho frontend
     res.json(JSON.parse(finalResponse));
   } catch (err) {
     console.error("Error from OpenAI:", err.message || err);
